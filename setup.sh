@@ -140,7 +140,7 @@ if [ "$install_python" = "yes" ]; then
     mkdir -p "$JUPYTER_DIR/notebooks"
     
     # Baixa o arquivo docker-compose.yml do GitHub para o diretório do Jupyter
-    curl -o "$JUPYTER_DIR/docker-compose.yml" https://raw.githubusercontent.com/SEU_USUARIO/zorin-setup-script/main/docker-compose.yml
+    curl -o "$JUPYTER_DIR/docker-compose.yml" https://raw.githubusercontent.com/ratacheski/zorin-dev-setup/main/docker-compose.yml
 
     # Inicializa o contêiner Jupyter Notebook com Docker Compose
     (cd "$JUPYTER_DIR" && docker-compose up -d)
