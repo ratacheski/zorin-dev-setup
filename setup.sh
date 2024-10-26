@@ -128,14 +128,6 @@ sudo apt install -y ./google-chrome-stable_current_amd64.deb
 # Instala o Extension Manager para facilitar o gerenciamento de extensões Gnome
 sudo apt install -y gnome-shell-extension-manager
 
-# Baixa e instala manualmente extensões do Gnome
-EXTENSIONS_DIR="$HOME/.local/share/gnome-shell/extensions"
-mkdir -p $EXTENSIONS_DIR
-git clone https://github.com/micheleg/dash-to-dock.git $EXTENSIONS_DIR/dash-to-dock@micxgx.gmail.com
-gnome-extensions enable dash-to-dock@micxgx.gmail.com
-git clone https://github.com/hackeita/pano.git $EXTENSIONS_DIR/pano@hackeriet.no
-gnome-extensions enable pano@hackeriet.no
-
 # Instala Flameshot para capturas de tela com anotações
 sudo apt install -y flameshot
 

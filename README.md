@@ -4,7 +4,7 @@ Este repositório contém um script automatizado para configurar um ambiente de 
 
 ## 🎯 Objetivo
 
-O script foi criado para inicializar um ambiente de desenvolvimento no Zorin OS rapidamente, garantindo uma configuração consistente e personalizada. Ele permite instalar Zsh, Docker, Go, NVM com Node.js, e ferramentas como VSCode, GitKraken, Postman, além de várias extensões para o Gnome.
+O script foi criado para inicializar um ambiente de desenvolvimento no Zorin OS rapidamente, garantindo uma configuração consistente e personalizada. Ele permite instalar Zsh, Docker, Go, NVM com Node.js, e ferramentas como VSCode, GitKraken, Postman, além de ferramentas para gerenciar as extensões para o Gnome.
 
 ## 📦 O que este script instala
 
@@ -21,10 +21,6 @@ O script foi criado para inicializar um ambiente de desenvolvimento no Zorin OS 
   - JetBrains Toolbox (opcional).
   - Google Chrome.
   - Postman.
-
-- **Extensões Gnome**:
-  - Dock fixa (Dash to Dock).
-  - Gerenciador de área de transferência (Pano Clipboard Manager).
 
 - **Ferramenta de Capturas de Tela**:
   - Flameshot para capturas de tela com anotações.
