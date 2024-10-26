@@ -50,7 +50,7 @@ echo "JetBrains Toolbox: $( [ "$install_toolbox" = "yes" ] && echo "SERÁ instal
 echo "============================"
 
 # Pausa para o usuário revisar
-read -p "Pressione Enter para continuar com essas configurações ou Ctrl+C para cancelar."
+read -rp "Pressione Enter para continuar com essas configurações ou Ctrl+C para cancelar." user_input
 
 
 echo "=== CRIANDO BACKUP DO AMBIENTE ==="
