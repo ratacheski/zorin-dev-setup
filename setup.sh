@@ -94,6 +94,14 @@ else
   echo "Fonte JetBrains Mono instalada com sucesso."
 fi
 
+# Restaura o arquivo de configuração do Powerlevel10k, se disponível
+echo "=== RESTAURANDO CONFIGURAÇÕES DO POWERLEVEL10K ==="
+P10K_CONFIG_URL="https://raw.githubusercontent.com/ratacheski/zorin-dev-setup/main/.p10k.zsh"
+if [ -f "$HOME/.p10k.zsh" ]; then
+    echo "Arquivo .p10k.zsh existente encontrado. Substituindo pelo arquivo do repositório."
+fi
+curl -fsSL "$P10K_CONFIG_URL" -o "$HOME/.p10k.zsh"
+
 # Verifica se o Docker está instalado
 echo "=== VERIFICANDO INSTALAÇÃO DO DOCKER ==="
 if command_exists docker; then
@@ -217,8 +225,6 @@ EXTENSIONS_DIR="$HOME/.local/share/gnome-shell/extensions"
 mkdir -p "$EXTENSIONS_DIR"
 git clone https://github.com/micheleg/dash-to-dock.git "$EXTENSIONS_DIR/dash-to-dock@micxgx.gmail.com"
 gnome-extensions enable dash-to-dock@micxgx.gmail.com
-git clone https://github.com/hackeita/pano.git "$EXTENSIONS_DIR/pano@hackeriet.no"
-gnome-extensions enable pano@hackeriet.no
 
 # Instala Flameshot para capturas de tela com anotações
 echo "=== INSTALANDO O FLAMESHOT ==="
