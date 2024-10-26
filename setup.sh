@@ -143,7 +143,7 @@ if [ "$install_python" = "yes" ]; then
     curl -o "$JUPYTER_DIR/docker-compose.yml" https://raw.githubusercontent.com/ratacheski/zorin-dev-setup/main/docker-compose.yml
 
     # Inicializa o contêiner Jupyter Notebook com Docker Compose
-    (cd "$JUPYTER_DIR" && docker-compose up -d)
+    (cd "$JUPYTER_DIR" && docker compose up -d)
 else
     echo "=== PULANDO INSTALAÇÃO DO PYTHON ==="
 fi
