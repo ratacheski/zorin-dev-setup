@@ -1,5 +1,38 @@
 #!/bin/bash
 
+# Configurações padrão
+install_python="yes"
+install_go="yes"
+install_nvm="yes"
+install_gitkraken="yes"
+install_toolbox="yes"
+
+# Parsing de argumentos
+for arg in "$@"; do
+  case $arg in
+    --ignore-python)
+      install_python="no"
+      ;;
+    --ignore-golang)
+      install_go="no"
+      ;;
+    --ignore-nvm)
+      install_nvm="no"
+      ;;
+    --ignore-gitkraken)
+      install_gitkraken="no"
+      ;;
+    --ignore-toolbox)
+      install_toolbox="no"
+      ;;
+    *)
+      echo "Argumento desconhecido: $arg"
+      exit 1
+      ;;
+  esac
+done
+
+
 # Verifica se o script foi iniciado como root
 if [ "$EUID" -eq 0 ]; then
   echo "Por favor, execute este script como usuário normal, sem sudo."
@@ -23,11 +56,18 @@ sed -i 's/plugins=(git)/plugins=(git history zsh-autosuggestions zsh-syntax-high
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
 sed -i 's/ZSH_THEME=".*"/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
 
-# Instala a fonte Nerd Font recomendada para Powerlevel10k
-mkdir -p "$HOME/.local/share/fonts"
-wget -P "$HOME/.local/share/fonts" https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/JetBrainsMono.zip
-unzip "$HOME/.local/share/fonts/JetBrainsMono.zip" -d "$HOME/.local/share/fonts"
-fc-cache -fv
+# Instala a fonte Nerd Font recomendada para Powerlevel10k, se ainda não estiver instalada
+FONT_DIR="$HOME/.local/share/fonts"
+if fc-list | grep -qi "JetBrainsMono"; then
+  echo "A fonte JetBrains Mono já está instalada. Pulando download."
+else
+  echo "Instalando a fonte JetBrains Mono..."
+  mkdir -p "$FONT_DIR"
+  wget -P "$FONT_DIR" https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/JetBrainsMono.zip
+  unzip "$FONT_DIR/JetBrainsMono.zip" -d "$FONT_DIR"
+  fc-cache -fv
+  echo "Fonte JetBrains Mono instalada com sucesso."
+fi
 
 # Instala Docker e Docker Compose com sudo
 sudo apt install -y apt-transport-https ca-certificates gnupg lsb-release
@@ -85,9 +125,6 @@ wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > pa
 sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
 sudo apt update && sudo apt install -y code
-wget -P "$HOME/.fonts" https://github.com/JetBrains/JetBrainsMono/releases/download/v2.242/JetBrainsMono-2.242.zip
-unzip "$HOME/.fonts/JetBrainsMono-2.242.zip" -d "$HOME/.fonts"
-fc-cache -fv
 echo -e '{
   "editor.fontFamily": "JetBrains Mono"
 }' > "$HOME/.config/Code/User/settings.json"
@@ -126,4 +163,10 @@ sudo apt install -y flameshot
 sudo apt autoremove -y && sudo apt clean
 rm -rf go$GO_VERSION.linux-amd64.tar.gz postman.tar.gz gitkraken-amd64.deb jetbrains-toolbox-1.25.12627.tar.gz google-chrome-stable_current_amd64.deb
 
-echo "Configuração concluída com sucesso! Reinicie o terminal e ative as extensões para aplicar algumas configurações."
+# Comando para alterar o shell para Zsh (movido para o final)
+echo "Para definir o Zsh como seu shell padrão, será necessário inserir sua senha."
+chsh -s $(which zsh)
+
+# Exibe mensagem final
+echo "Configuração concluída com sucesso!"
+echo "Reinicie o terminal e ative as extensões para aplicar algumas configurações."
