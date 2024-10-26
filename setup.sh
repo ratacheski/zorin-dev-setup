@@ -119,7 +119,7 @@ fi
 
 # Instala Go (opcional)
 if [ "$install_go" = "yes" ]; then
-    GO_VERSION="1.18.3"
+    GO_VERSION="1.23.2"
     echo "=== INSTALANDO O GOLANG $GO_VERSION ==="
     wget https://golang.org/dl/go$GO_VERSION.linux-amd64.tar.gz
     sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
