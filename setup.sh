@@ -95,6 +95,7 @@ else
 fi
 
 # Verifica se o Docker está instalado
+echo "=== VERIFICANDO INSTALAÇÃO DO DOCKER ==="
 if command_exists docker; then
     echo "Docker já está instalado. Pulando instalação do Docker."
 else
