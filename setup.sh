@@ -8,36 +8,50 @@ install_gitkraken="yes"
 install_toolbox="yes"
 
 # Parsing de argumentos
-for arg in "$@"; do
-  case $arg in
-    --ignore-python)
-      install_python="no"
-      ;;
-    --ignore-golang)
-      install_go="no"
-      ;;
-    --ignore-nvm)
-      install_nvm="no"
-      ;;
-    --ignore-gitkraken)
-      install_gitkraken="no"
-      ;;
-    --ignore-toolbox)
-      install_toolbox="no"
-      ;;
-    *)
-      echo "Argumento desconhecido: $arg"
-      exit 1
-      ;;
-  esac
-done
-
+if [ "$#" -gt 0 ]; then
+  for arg in "$@"; do
+    case $arg in
+      --ignore-python)
+        install_python="no"
+        ;;
+      --ignore-golang)
+        install_go="no"
+        ;;
+      --ignore-nvm)
+        install_nvm="no"
+        ;;
+      --ignore-gitkraken)
+        install_gitkraken="no"
+        ;;
+      --ignore-toolbox)
+        install_toolbox="no"
+        ;;
+      *)
+        echo "Argumento desconhecido: $arg"
+        exit 1
+        ;;
+    esac
+  done
+fi
 
 # Verifica se o script foi iniciado como root
 if [ "$EUID" -eq 0 ]; then
   echo "Por favor, execute este script como usuário normal, sem sudo."
   exit 1
 fi
+
+# Exibe as configurações selecionadas
+echo "=== RESUMO DA INSTALAÇÃO ==="
+echo "Python e Jupyter Notebook: $( [ "$install_python" = "yes" ] && echo "SERÁ instalado" || echo "NÃO será instalado" )"
+echo "Go: $( [ "$install_go" = "yes" ] && echo "SERÁ instalado" || echo "NÃO será instalado" )"
+echo "NVM com Node.js: $( [ "$install_nvm" = "yes" ] && echo "SERÁ instalado" || echo "NÃO será instalado" )"
+echo "GitKraken: $( [ "$install_gitkraken" = "yes" ] && echo "SERÁ instalado" || echo "NÃO será instalado" )"
+echo "JetBrains Toolbox: $( [ "$install_toolbox" = "yes" ] && echo "SERÁ instalado" || echo "NÃO será instalado" )"
+echo "============================"
+
+# Pausa para o usuário revisar
+read -p "Pressione Enter para continuar com essas configurações ou Ctrl+C para cancelar."
+
 
 echo "=== CRIANDO BACKUP DO AMBIENTE ==="
 # Instala Timeshift e cria um ponto de restauração inicial com sudo
