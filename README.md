@@ -57,7 +57,7 @@ Para executar este script, você precisará:
 1. Para baixar e executar o script automaticamente com todas as opções de instalação habilitadas, execute o comando abaixo:
 
    ```bash
-   curl -sSL "https://raw.githubusercontent.com/ratacheski/zorin-dev-setup/main/setup.sh" | bash
+   curl -sSL "https://raw.githubusercontent.com/ratacheski/zorin-dev-setup/main/setup.sh" -o /tmp/setup.sh && bash /tmp/setup.sh 
    ```
 
 2. Caso deseje **ignorar** alguma instalação, você pode passar argumentos para o script. Use os argumentos abaixo conforme a necessidade:
@@ -71,7 +71,7 @@ Para executar este script, você precisará:
    ### Exemplo
 
    ```bash
-   curl -sSL "https://raw.githubusercontent.com/ratacheski/zorin-dev-setup/main/setup.sh" | bash -s -- --ignore-python --ignore-gitkraken
+   curl -sSL "https://raw.githubusercontent.com/ratacheski/zorin-dev-setup/main/setup.sh" -o /tmp/setup.sh && bash /tmp/setup.sh --ignore-python --ignore-gitkraken
    ```
 
    No exemplo acima, o script **ignora** a instalação do **Python** e do **GitKraken**.
