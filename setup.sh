@@ -39,13 +39,17 @@ if [ "$EUID" -eq 0 ]; then
   exit 1
 fi
 
+echo "=== CRIANDO BACKUP DO AMBIENTE ==="
 # Instala Timeshift e cria um ponto de restauração inicial com sudo
 sudo apt update && sudo apt install -y timeshift
 sudo timeshift --create --comments "Ponto de restauração inicial antes de configurações"
 
+echo "=== ATUALIZANDO E INSTALANDO DEPENDÊNCIAS NECESSÁRIAS ==="
 # Atualiza e instala dependências necessárias com sudo
 sudo apt install -y curl wget git unzip gnome-shell-extensions gnome-tweaks
 
+
+echo "=== INSTALANDO ZSH E CONFIGURANDO OH MY ZSH COM PLUGINS E TEMA ==="
 # Instala o Zsh e configura o Oh My Zsh com plugins e tema
 sudo apt install -y zsh
 chsh -s $(which zsh)
@@ -56,6 +60,7 @@ sed -i 's/plugins=(git)/plugins=(git history zsh-autosuggestions zsh-syntax-high
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
 sed -i 's/ZSH_THEME=".*"/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
 
+echo "=== VERIFICANDO INSTALAÇÃO DA FONTE JETBRAINS MONO ==="
 # Instala a fonte Nerd Font recomendada para Powerlevel10k, se ainda não estiver instalada
 FONT_DIR="$HOME/.local/share/fonts"
 if fc-list | grep -qi "JetBrainsMono"; then
@@ -69,6 +74,7 @@ else
   echo "Fonte JetBrains Mono instalada com sucesso."
 fi
 
+echo "=== INSTALANDO DO DOCKER ==="
 # Instala Docker e Docker Compose com sudo
 sudo apt install -y apt-transport-https ca-certificates gnupg lsb-release
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -84,13 +90,21 @@ chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
 # Instala Go (opcional)
 if [ "$install_go" = "yes" ]; then
     GO_VERSION="1.18.3"
+    echo "=== INSTALANDO O GOLANG $GO_VERSION ==="
     wget https://golang.org/dl/go$GO_VERSION.linux-amd64.tar.gz
     sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
     echo "export PATH=\$PATH:/usr/local/go/bin" >> "$HOME/.profile"
+else
+    echo "=== PULANDO INSTALAÇÃO DO GOLANG ==="
 fi
 
 # Instala Python 3 e Jupyter Notebook com Docker Compose (opcional)
 if [ "$install_python" = "yes" ]; then
+
+    echo "=== INSTALANDO O PYTHON 3 ==="
+    sudo apt install -y python3 python3-pip
+
+    echo "=== CONFIGURANDO AMBIENTE JUPYTER NOTEBOOK COM DOCKER COMPOSE ==="    
     # Cria uma pasta específica para o ambiente Jupyter Notebook
     JUPYTER_DIR="$HOME/jupyter_environment"
     mkdir -p "$JUPYTER_DIR/notebooks"
@@ -100,10 +114,13 @@ if [ "$install_python" = "yes" ]; then
 
     # Inicializa o contêiner Jupyter Notebook com Docker Compose
     (cd "$JUPYTER_DIR" && docker-compose up -d)
+else
+    echo "=== PULANDO INSTALAÇÃO DO PYTHON ==="
 fi
 
 # Instala NVM e versões do Node.js (opcional)
 if [ "$install_nvm" = "yes" ]; then
+    echo "=== INSTALANDO O NVM ==="
     sh -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash"
     source "$HOME/.nvm/nvm.sh"
     nvm install 8
@@ -112,15 +129,21 @@ if [ "$install_nvm" = "yes" ]; then
     nvm install 18
     nvm install 20
     nvm alias default 20
+else
+    echo "=== PULANDO INSTALAÇÃO DO NVM ==="
 fi
 
 # Instala GitKraken (opcional)
 if [ "$install_gitkraken" = "yes" ]; then
+    echo "=== INSTALANDO O GITKRAKEN ==="
     wget https://release.gitkraken.com/linux/gitkraken-amd64.deb
     sudo apt install -y ./gitkraken-amd64.deb
+else
+    echo "=== PULANDO INSTALAÇÃO DO GITKRAKEN ==="
 fi
 
 # Instala VSCode e configura JetBrains Mono como fonte padrão
+echo "=== INSTALANDO O VSCODE ==="
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
@@ -130,24 +153,29 @@ echo -e '{
 }' > "$HOME/.config/Code/User/settings.json"
 
 # Instala o Postman
+echo "=== INSTALANDO O POSTMAN ==="
 wget https://dl.pstmn.io/download/latest/linux64 -O postman.tar.gz
 sudo tar -xzf postman.tar.gz -C /opt
 sudo ln -s /opt/Postman/Postman /usr/local/bin/postman
 
 # Instala JetBrains Toolbox (opcional)
 if [ "$install_toolbox" = "yes" ]; then
-    wget https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.25.12627.tar.gz
-    tar -xzf jetbrains-toolbox-1.25.12627.tar.gz
+    echo "=== INSTALANDO O JETBRAINS TOOLBOX ==="
+    wget https://download.jetbrains.com/toolbox/jetbrains-toolbox-2.5.1.34629.tar.gz
+    tar -xzf jetbrains-toolbox-2.5.1.34629.tar.gz
     sudo mv jetbrains-toolbox-*/jetbrains-toolbox /usr/local/bin
+else
+    echo "=== PULANDO INSTALAÇÃO DO JETBRAINS TOOLBOX ==="
 fi
 
 # Instala o Google Chrome
+echo "=== INSTALANDO O CHROME ==="
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo apt install -y ./google-chrome-stable_current_amd64.deb
 
 # Instala o Extension Manager para facilitar o gerenciamento de extensões Gnome
+echo "=== INSTALANDO O GNOME EXTENSION E EXTENSÕES ADICIONAIS ==="
 sudo apt install -y gnome-shell-extension-manager
-
 # Baixa e instala manualmente extensões do Gnome
 EXTENSIONS_DIR="$HOME/.local/share/gnome-shell/extensions"
 mkdir -p "$EXTENSIONS_DIR"
@@ -157,11 +185,13 @@ git clone https://github.com/hackeita/pano.git "$EXTENSIONS_DIR/pano@hackeriet.n
 gnome-extensions enable pano@hackeriet.no
 
 # Instala Flameshot para capturas de tela com anotações
+echo "=== INSTALANDO O FLAMESHOT ==="
 sudo apt install -y flameshot
 
 # Limpeza de arquivos desnecessários
+echo "=== LIMPEZA DE ARQUIVOS FINAIS ==="
 sudo apt autoremove -y && sudo apt clean
-rm -rf go$GO_VERSION.linux-amd64.tar.gz postman.tar.gz gitkraken-amd64.deb jetbrains-toolbox-1.25.12627.tar.gz google-chrome-stable_current_amd64.deb
+rm -rf go$GO_VERSION.linux-amd64.tar.gz postman.tar.gz gitkraken-amd64.deb jetbrains-toolbox-2.5.1.34629.tar.gz google-chrome-stable_current_amd64.deb
 
 # Comando para alterar o shell para Zsh (movido para o final)
 echo "Para definir o Zsh como seu shell padrão, será necessário inserir sua senha."
