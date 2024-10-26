@@ -6,6 +6,27 @@ Este repositório contém um script automatizado para configurar um ambiente de 
 
 O script foi criado para inicializar um ambiente de desenvolvimento no Zorin OS rapidamente, garantindo uma configuração consistente e personalizada. Ele permite instalar Zsh, Docker, Go, NVM com Node.js, e ferramentas como VSCode, GitKraken, Postman, além de ferramentas para gerenciar as extensões para o Gnome.
 
+
+## 🛠️ Uso do Timeshift para Pontos de Restauração
+
+Antes de iniciar as instalações e configurações, o script instala o **Timeshift** e cria um **ponto de restauração** do sistema. Essa prática permite que você restaure o sistema para o estado inicial caso ocorra algum problema durante o processo de configuração.
+
+- **O que é o Timeshift?** O Timeshift é uma ferramenta de snapshot (instantâneo) que permite criar e gerenciar pontos de restauração do sistema, algo similar ao ponto de restauração do Windows.
+- **Ponto de Restauração Inicial**: O script cria um snapshot do sistema logo após instalar o Timeshift. Esse ponto de restauração inicial pode ser usado para reverter quaisquer mudanças feitas pelo script.
+
+### Como Restaurar Usando o Timeshift
+
+1. **Abrir o Timeshift**: Execute o comando a seguir para abrir o Timeshift com interface gráfica:
+   ```bash
+   sudo timeshift-launcher
+   ```
+
+2. **Selecionar o Snapshot**: Na interface do Timeshift, selecione o snapshot que você deseja restaurar (por exemplo, o ponto de restauração inicial criado pelo script).
+
+3. **Restaurar**: Siga as instruções para restaurar o sistema ao estado do snapshot selecionado.
+
+> **Dica**: É recomendável usar o Timeshift periodicamente para criar novos snapshots, especialmente antes de instalar novos pacotes ou realizar grandes mudanças no sistema.
+
 ## 📦 O que este script instala
 
 - **Terminal e Shell**:
