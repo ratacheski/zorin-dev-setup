@@ -34,6 +34,12 @@ if [ "$#" -gt 0 ]; then
   done
 fi
 
+# Função para verificar se um comando existe
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+
 # Verifica se o script foi iniciado como root
 if [ "$EUID" -eq 0 ]; then
   echo "Por favor, execute este script como usuário normal, sem sudo."
@@ -88,18 +94,27 @@ else
   echo "Fonte JetBrains Mono instalada com sucesso."
 fi
 
-echo "=== INSTALANDO DO DOCKER ==="
-# Instala Docker e Docker Compose com sudo
-sudo apt install -y apt-transport-https ca-certificates gnupg lsb-release
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io
-sudo usermod -aG docker $USER
-newgrp docker
-DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
-mkdir -p $DOCKER_CONFIG/cli-plugins
-curl -SL https://github.com/docker/compose/releases/download/v2.10.2/docker-compose-linux-$(uname -m) -o $DOCKER_CONFIG/cli-plugins/docker-compose
-chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+# Verifica se o Docker está instalado
+if command_exists docker; then
+    echo "Docker já está instalado. Pulando instalação do Docker."
+else
+    echo "=== INSTALANDO DOCKER E DOCKER COMPOSE ==="
+    
+    # Instala Docker e Docker Compose
+    sudo apt install -y apt-transport-https ca-certificates gnupg lsb-release
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io
+    sudo usermod -aG docker "$USER"
+
+    # Instala Docker Compose
+    DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+    mkdir -p "$DOCKER_CONFIG/cli-plugins"
+    curl -SL https://github.com/docker/compose/releases/download/v2.10.2/docker-compose-linux-$(uname -m) -o "$DOCKER_CONFIG/cli-plugins/docker-compose"
+    chmod +x "$DOCKER_CONFIG/cli-plugins/docker-compose"
+    
+    echo "Docker e Docker Compose instalados com sucesso."
+fi
 
 # Instala Go (opcional)
 if [ "$install_go" = "yes" ]; then
