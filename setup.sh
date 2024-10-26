@@ -124,6 +124,11 @@ if [ "$install_go" = "yes" ]; then
     wget https://golang.org/dl/go$GO_VERSION.linux-amd64.tar.gz
     sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
     echo "export PATH=\$PATH:/usr/local/go/bin" >> "$HOME/.profile"
+    {
+    echo 'export PATH=$PATH:/usr/local/go/bin'
+    echo 'export GOPATH=$HOME/go'
+    echo 'export PATH=$PATH:$GOPATH/bin'
+    } >> "$HOME/.zshrc"
 else
     echo "=== PULANDO INSTALAÇÃO DO GOLANG ==="
 fi
@@ -133,6 +138,7 @@ if [ "$install_python" = "yes" ]; then
 
     echo "=== INSTALANDO O PYTHON 3 ==="
     sudo apt install -y python3 python3-pip
+    echo "export PATH=\$PATH:\$HOME/.local/bin" >> "$HOME/.zshrc"
 
     echo "=== CONFIGURANDO AMBIENTE JUPYTER NOTEBOOK COM DOCKER COMPOSE ==="    
     # Cria uma pasta específica para o ambiente Jupyter Notebook
