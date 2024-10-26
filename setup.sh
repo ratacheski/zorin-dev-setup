@@ -1,72 +1,41 @@
 #!/bin/bash
 
-# Captura o usuário original e seu diretório home
-ORIGINAL_USER=$(logname)
-ORIGINAL_HOME=$(eval echo "~$ORIGINAL_USER")
+# Verifica se o script foi iniciado como root
+if [ "$EUID" -eq 0 ]; then
+  echo "Por favor, execute este script como usuário normal, sem sudo."
+  exit 1
+fi
 
-# Configurações padrão
-install_python="yes"
-install_go="yes"
-install_nvm="yes"
-install_gitkraken="yes"
-install_toolbox="yes"
-
-# Parsing de argumentos
-for arg in "$@"; do
-  case $arg in
-    --ignore-python)
-      install_python="no"
-      ;;
-    --ignore-golang)
-      install_go="no"
-      ;;
-    --ignore-nvm)
-      install_nvm="no"
-      ;;
-    --ignore-gitkraken)
-      install_gitkraken="no"
-      ;;
-    --ignore-toolbox)
-      install_toolbox="no"
-      ;;
-    *)
-      echo "Argumento desconhecido: $arg"
-      exit 1
-      ;;
-  esac
-done
-
-# Instala o Timeshift para snapshots e cria um ponto de restauração inicial
+# Instala Timeshift e cria um ponto de restauração inicial com sudo
 sudo apt update && sudo apt install -y timeshift
 sudo timeshift --create --comments "Ponto de restauração inicial antes de configurações"
 
-# Atualiza e instala dependências necessárias
-sudo apt update && sudo apt upgrade -y
+# Atualiza e instala dependências necessárias com sudo
 sudo apt install -y curl wget git unzip gnome-shell-extensions gnome-tweaks
 
 # Instala o Zsh e configura o Oh My Zsh com plugins e tema
 sudo apt install -y zsh
-chsh -s $(which zsh) "$ORIGINAL_USER"
-sudo -u "$ORIGINAL_USER" sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-sudo -u "$ORIGINAL_USER" git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$ORIGINAL_HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-sudo -u "$ORIGINAL_USER" git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$ORIGINAL_HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-sudo -u "$ORIGINAL_USER" sed -i 's/plugins=(git)/plugins=(git history zsh-autosuggestions zsh-syntax-highlighting)/' $ORIGINAL_HOME/.zshrc
-sudo -u "$ORIGINAL_USER" git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$ORIGINAL_HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-sudo -u "$ORIGINAL_USER" sed -i 's/ZSH_THEME=".*"/ZSH_THEME="powerlevel10k\/powerlevel10k"/' $ORIGINAL_HOME/.zshrc
+chsh -s $(which zsh)
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+sed -i 's/plugins=(git)/plugins=(git history zsh-autosuggestions zsh-syntax-highlighting)/' ~/.zshrc
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
+sed -i 's/ZSH_THEME=".*"/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
 
 # Instala a fonte Nerd Font recomendada para Powerlevel10k
-mkdir -p "$ORIGINAL_HOME/.local/share/fonts"
-wget -P "$ORIGINAL_HOME/.local/share/fonts" https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/JetBrainsMono.zip
-unzip "$ORIGINAL_HOME/.local/share/fonts/JetBrainsMono.zip" -d "$ORIGINAL_HOME/.local/share/fonts"
+mkdir -p "$HOME/.local/share/fonts"
+wget -P "$HOME/.local/share/fonts" https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/JetBrainsMono.zip
+unzip "$HOME/.local/share/fonts/JetBrainsMono.zip" -d "$HOME/.local/share/fonts"
 fc-cache -fv
 
-# Instala Docker e Docker Compose
+# Instala Docker e Docker Compose com sudo
 sudo apt install -y apt-transport-https ca-certificates gnupg lsb-release
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io
-sudo usermod -aG docker "$ORIGINAL_USER"
-DOCKER_CONFIG=${DOCKER_CONFIG:-$ORIGINAL_HOME/.docker}
+sudo usermod -aG docker "$USER"
+DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
 mkdir -p "$DOCKER_CONFIG/cli-plugins"
 curl -SL https://github.com/docker/compose/releases/download/v2.10.2/docker-compose-linux-$(uname -m) -o "$DOCKER_CONFIG/cli-plugins/docker-compose"
 chmod +x "$DOCKER_CONFIG/cli-plugins/docker-compose"
@@ -76,21 +45,26 @@ if [ "$install_go" = "yes" ]; then
     GO_VERSION="1.18.3"
     wget https://golang.org/dl/go$GO_VERSION.linux-amd64.tar.gz
     sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
-    echo "export PATH=\$PATH:/usr/local/go/bin" >> "$ORIGINAL_HOME/.profile"
+    echo "export PATH=\$PATH:/usr/local/go/bin" >> "$HOME/.profile"
 fi
 
 # Instala Python 3 e Jupyter Notebook com Docker Compose (opcional)
 if [ "$install_python" = "yes" ]; then
-    sudo apt install -y python3 python3-pip
-    mkdir -p "$ORIGINAL_HOME/jupyter_notebooks"
-    curl -o "$ORIGINAL_HOME/docker-compose.yml" https://raw.githubusercontent.com/ratacheski/zorin-dev-setup/main/docker-compose.yml
-    sudo -u "$ORIGINAL_USER" docker-compose -f "$ORIGINAL_HOME/docker-compose.yml" up -d
+    # Cria uma pasta específica para o ambiente Jupyter Notebook
+    JUPYTER_DIR="$HOME/jupyter_environment"
+    mkdir -p "$JUPYTER_DIR/notebooks"
+    
+    # Baixa o arquivo docker-compose.yml do GitHub para o diretório do Jupyter
+    curl -o "$JUPYTER_DIR/docker-compose.yml" https://raw.githubusercontent.com/SEU_USUARIO/zorin-setup-script/main/docker-compose.yml
+
+    # Inicializa o contêiner Jupyter Notebook com Docker Compose
+    (cd "$JUPYTER_DIR" && docker-compose up -d)
 fi
 
 # Instala NVM e versões do Node.js (opcional)
 if [ "$install_nvm" = "yes" ]; then
-    sudo -u "$ORIGINAL_USER" sh -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash"
-    source "$ORIGINAL_HOME/.nvm/nvm.sh"
+    sh -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash"
+    source "$HOME/.nvm/nvm.sh"
     nvm install 8
     nvm install 12
     nvm install 16
@@ -110,12 +84,12 @@ wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > pa
 sudo install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
 sudo apt update && sudo apt install -y code
-wget -P "$ORIGINAL_HOME/.fonts" https://github.com/JetBrains/JetBrainsMono/releases/download/v2.242/JetBrainsMono-2.242.zip
-unzip "$ORIGINAL_HOME/.fonts/JetBrainsMono-2.242.zip" -d "$ORIGINAL_HOME/.fonts"
+wget -P "$HOME/.fonts" https://github.com/JetBrains/JetBrainsMono/releases/download/v2.242/JetBrainsMono-2.242.zip
+unzip "$HOME/.fonts/JetBrainsMono-2.242.zip" -d "$HOME/.fonts"
 fc-cache -fv
 echo -e '{
   "editor.fontFamily": "JetBrains Mono"
-}' > "$ORIGINAL_HOME/.config/Code/User/settings.json"
+}' > "$HOME/.config/Code/User/settings.json"
 
 # Instala o Postman
 wget https://dl.pstmn.io/download/latest/linux64 -O postman.tar.gz
@@ -135,6 +109,14 @@ sudo apt install -y ./google-chrome-stable_current_amd64.deb
 
 # Instala o Extension Manager para facilitar o gerenciamento de extensões Gnome
 sudo apt install -y gnome-shell-extension-manager
+
+# Baixa e instala manualmente extensões do Gnome
+EXTENSIONS_DIR="$HOME/.local/share/gnome-shell/extensions"
+mkdir -p "$EXTENSIONS_DIR"
+git clone https://github.com/micheleg/dash-to-dock.git "$EXTENSIONS_DIR/dash-to-dock@micxgx.gmail.com"
+gnome-extensions enable dash-to-dock@micxgx.gmail.com
+git clone https://github.com/hackeita/pano.git "$EXTENSIONS_DIR/pano@hackeriet.no"
+gnome-extensions enable pano@hackeriet.no
 
 # Instala Flameshot para capturas de tela com anotações
 sudo apt install -y flameshot

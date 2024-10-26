@@ -8,4 +8,5 @@ services:
     environment:
       - JUPYTER_ENABLE_LAB=yes
     volumes:
-      - ./jupyter_notebooks:/home/jovyan/work
+      - ./notebooks:/home/jovyan/work
+    restart: always
